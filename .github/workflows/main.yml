@@ -1,0 +1,36 @@
+name: Build DXV Codec installer
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "dxv-codec/**"
+      - ".github/workflows/build-installer.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      VCPKG_ROOT: C:/vcpkg
+    defaults:
+      run:
+        working-directory: dxv-codec
+        shell: cmd
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install Inno Setup 6
+        shell: pwsh
+        run: choco install innosetup --yes --no-progress
+
+      - name: Build DLL and installer
+        run: build.bat
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: DXV-Codec-Setup
+          path: dxv-codec/installer/Output/DXV-Codec-Setup.exe
+          if-no-files-found: error
+          retention-days: 30
